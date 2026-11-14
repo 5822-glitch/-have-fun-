@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111916">
+    <title>Oakfall — Math Royale</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main id="game-shell">
+      <div id="world" aria-label="Three-dimensional Oakfall game arena"></div>
+      <div class="vignette"></div>
+
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Oakfall home">
+          <span class="brand-mark">O</span>
+          <span>OAKFALL<span class="brand-sub">MATH ROYALE</span></span>
+        </a>
+        <div class="match-meta">
+          <span class="live-dot"></span>
+          <span id="match-status">LOBBY OPEN</span>
+          <span class="meta-divider"></span>
+          <span>SOLO • BOT LOBBY</span>
+        </div>
+        <button id="math-button" class="math-button"><span>∑</span> MATH CHALLENGE</button>
+      </header>
+
+      <section class="hud hud-left" aria-label="Player status">
+        <div class="status-card">
+          <div class="card-eyebrow"><span class="eyebrow-dot"></span> YOUR STATUS</div>
+          <div class="player-name"><span class="player-avatar">Y</span><span>YOU <small>FIELD OPERATIVE</small></span><span class="alive-tag">ALIVE</span></div>
+          <div class="stat-label"><span>VITALS</span><span id="health-value">100</span></div>
+          <div class="meter"><div id="health-meter" class="meter-fill health-fill"></div></div>
+          <div class="stat-label armor-label"><span>ARMOR</span><span id="armor-value">50</span></div>
+          <div class="meter armor-meter"><div id="armor-meter" class="meter-fill armor-fill"></div></div>
+        </div>
+        <div class="mini-map-card">
+          <div class="mini-head"><span>FIELD MAP</span><span class="map-coords">N ↑</span></div>
+          <canvas id="minimap" width="188" height="188" aria-label="Arena minimap"></canvas>
+          <div class="map-legend"><span><i class="you-key"></i> YOU</span><span><i class="enemy-key"></i> OPPONENTS</span></div>
+        </div>
+      </section>
+
+      <section class="hud hud-right" aria-label="Match status">
+        <div class="remaining-card">
+          <div class="card-eyebrow">OPERATORS REMAINING</div>
+          <div class="remaining-count"><strong id="remaining-count">60</strong><span> / 60</span></div>
+          <div class="remaining-bar"><i id="remaining-meter"></i></div>
+          <div class="kill-line"><span>YOUR ELIMINATIONS</span><b id="kill-count">00</b></div>
+        </div>
+        <div class="landmark-card"><span class="landmark-icon">⌖</span><span><b>OAKFALL ISLAND</b><small>220 × 220 FIELD</small></span></div>
+      </section>
+
+      <div id="crosshair" class="crosshair" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
+      <div id="toast" class="toast" role="status"></div>
+
+      <section class="bottom-hud">
+        <div class="weapon-panel">
+          <div class="weapon-heading"><span>LOADOUT</span><span id="ammo-label">READY</span></div>
+          <div id="weapon-slots" class="weapon-slots"></div>
+        </div>
+        <div class="bottom-center">
+          <div id="prompt" class="interaction-prompt"></div>
+          <div class="controls-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVE <span>•</span> <kbd>CLICK</kbd> FIRE <span>•</span> <kbd>E</kbd> PICK UP <span>•</span> <kbd>F</kbd> TOSS</div>
+        </div>
+        <button id="challenge-small" class="challenge-chip"><span>∑</span><span>NEED A NEW GUN?<small>SOLVE TO UNLOCK</small></span><b>↗</b></button>
+      </section>
+
+      <div id="start-screen" class="screen-overlay">
+        <div class="start-card">
+          <div class="start-kicker"><span class="live-dot"></span> OAKFALL TRAINING GROUNDS</div>
+          <div class="start-title">Think fast.<br><em>Stay sharp.</em></div>
+          <p>Outplay 59 rivals in a living 3D island. Solve quick math challenges to unlock a bigger arsenal.</p>
+          <div class="starter-loadout">
+            <span>STARTER LOADOUT</span>
+            <div class="starter-weapons"><b>◆</b> PISTOL <b>◆</b> SEMI-AUTO <b>◆</b> SNIPER <b>◆</b> AR-15</div>
+          </div>
+          <button id="play-button" class="primary-button">DROP INTO OAKFALL <span>→</span></button>
+          <div class="start-footnote">60 OPERATORS <span>•</span> ONE WINNER <span>•</span> NO DOWNLOAD</div>
+        </div>
+        <div class="start-aside"><span>01 — 60 OPERATORS</span><span>02 — SOLVE TO UNLOCK</span><span>03 — BE THE LAST ONE</span></div>
+      </div>
+
+      <div id="math-modal" class="modal-backdrop" aria-hidden="true">
+        <section class="math-card" role="dialog" aria-modal="true" aria-labelledby="math-title">
+          <button id="close-math" class="close-button" aria-label="Close challenge">×</button>
+          <div class="math-kicker">FIELD INTELLIGENCE · <span id="math-level">LEVEL 01</span></div>
+          <div id="math-title" class="math-title">Unlock your next weapon.</div>
+          <p class="math-description">Solve the problem to earn an unlock point. Keep your mind as quick as your aim.</p>
+          <div class="problem-box"><span id="problem-text">12 + 8 = ?</span><span class="problem-mark">?</span></div>
+          <form id="answer-form" class="answer-form">
+            <label class="sr-only" for="answer-input">Your answer</label>
+            <input id="answer-input" type="number" inputmode="numeric" autocomplete="off" placeholder="Your answer">
+            <button type="submit" class="primary-button">SUBMIT ANSWER <span>→</span></button>
+          </form>
+          <div id="answer-feedback" class="answer-feedback" aria-live="polite"></div>
+          <div class="unlock-progress"><span>UNLOCK PROGRESS</span><span id="unlock-count">0 / 20 GUNS</span></div>
+          <div class="progress-track"><i id="unlock-meter"></i></div>
+        </section>
+      </div>
+
+      <div id="end-screen" class="screen-overlay end-overlay" aria-hidden="true">
+        <div class="end-card">
+          <span class="end-kicker">MATCH COMPLETE</span>
+          <h1 id="end-title">FIELD REPORT</h1>
+          <p id="end-message"></p>
+          <button id="play-again" class="primary-button">PLAY AGAIN <span>↻</span></button>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
